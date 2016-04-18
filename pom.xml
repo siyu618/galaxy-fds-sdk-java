@@ -110,6 +110,25 @@
             <mainClass>com.xiaomi.infra.galaxy.fds.example.FDSClient</mainClass>
           </configuration>
         </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+          </configuration>
+          <executions>
+            <execution>
+              <id>make-assembly-for-test</id>
+              <phase>test-compile</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -120,6 +139,25 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly-for-test</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -182,3 +220,4 @@
     </profile>
   </profiles>
 </project>
+

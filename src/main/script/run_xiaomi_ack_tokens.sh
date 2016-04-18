@@ -10,7 +10,7 @@ get_working_dir()
 
 argv_num=$#
 
-processing_day=`date -d "1 hour ago" +"%Y-%m-%d"`
+processing_day=`date -d "1 hour ago" +"%Y%m%d"`
 processing_hour=`date  -d "1 hour ago" +"%H"`
 if [ ${argv_num} -eq 2 ]; then
     processing_day=$1
@@ -37,7 +37,7 @@ out_put="xiaomi.yidian_install.${processing_day}"
 # data dir
 grid_res_path=${GRID_XIAOMI_ACK_TOKENS_PATH}/${processing_day}
 grid_res_path_working=${grid_res_path}.working
-local_data_dir="./local/"
+local_data_dir="./data/"
 local_data="${local_data_dir}/xiaomi_ack_tokens.${processing_day}"
 xiaomi_ready_file=${OBJECT_NAME}/_SUCCESS_${processing_day}
 #
@@ -50,6 +50,7 @@ if [ $? -eq 0 ]; then
 fi
 
 # 1. check if success file is ready
+info "check if ready file (${xiaomi_ready_file}) ready"
 java -cp target/galaxy-fds-sdk-java-2.0.0-jar-with-dependencies.jar com.xiaomi.infra.galaxy.fds.services.FDSClient \
 $APP_ACCESS_KEY $APP_ACCESS_SECRET $BUCKET_NAME ${xiaomi_ready_file} > /dev/null
 
@@ -58,12 +59,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 2. get the data
+# 2. get the data: msgID\tacktime\talias
 mkdir -p ${local_data_dir}
-echo "" > ${local_data}
+rm ${local_data}
 for i in `seq -f "%05g"  0 99`
 do
     object=${OBJECT_NAME}/data/part-${i}
+    info "get object ${object}"
     java -cp target/galaxy-fds-sdk-java-2.0.0-jar-with-dependencies.jar com.xiaomi.infra.galaxy.fds.services.FDSClient \
 $APP_ACCESS_KEY $APP_ACCESS_SECRET $BUCKET_NAME ${object} >>${local_data}
     if [ $? -ne 0 ]; then
@@ -73,7 +75,8 @@ $APP_ACCESS_KEY $APP_ACCESS_SECRET $BUCKET_NAME ${object} >>${local_data}
 done
 
 # 3. put the data onto grid
-hadoop fs -rm -r ${grid_res_path_working}
+hadoop fs -rm -r -f ${grid_res_path_working}
+hadoop fs -mkdir -p ${GRID_XIAOMI_ACK_TOKENS_PATH}
 hadoop fs -mkdir -p ${grid_res_path_working}
 hadoop fs -put ${local_data} ${grid_res_path_working}
 hadoop fs -mv ${grid_res_path_working} ${grid_res_path}
