@@ -58,8 +58,9 @@ public class FDSClient {
         int totalReadLen = 0;
         int readLen = 0;
         while ((readLen = in.read(buffer)) > 0) {
-            System.out.print(readLen);
-            System.out.println(new String(buffer));
+//            System.out.print(readLen);
+//            System.out.println(new String(buffer));
+            System.out.print(new String(buffer));
         }
         in.close();
 

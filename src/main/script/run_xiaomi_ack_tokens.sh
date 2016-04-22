@@ -20,6 +20,7 @@ fi
 
 # start to run
 working_dir=`get_working_dir`
+cd ${working_dir}
 source ${working_dir}/common.sh
 import_evn
 print_time
@@ -41,6 +42,7 @@ local_data_dir="./data/"
 local_data="${local_data_dir}/xiaomi_ack_tokens.${processing_day}"
 xiaomi_ready_file=${OBJECT_NAME}/_SUCCESS_${processing_day}
 #
+JAVA_OPTS="-cp .:galaxy-fds-sdk-java-2.0.0-jar-with-dependencies.jar"
 
 # 0. check if already done
 hadoop fs -test -e ${grid_res_path}
@@ -51,7 +53,7 @@ fi
 
 # 1. check if success file is ready
 info "check if ready file (${xiaomi_ready_file}) ready"
-java -cp target/galaxy-fds-sdk-java-2.0.0-jar-with-dependencies.jar com.xiaomi.infra.galaxy.fds.services.FDSClient \
+java ${JAVA_OPTS} com.xiaomi.infra.galaxy.fds.services.FDSClient \
 $APP_ACCESS_KEY $APP_ACCESS_SECRET $BUCKET_NAME ${xiaomi_ready_file} > /dev/null
 
 if [ $? -ne 0 ]; then
@@ -66,7 +68,7 @@ for i in `seq -f "%05g"  0 99`
 do
     object=${OBJECT_NAME}/data/part-${i}
     info "get object ${object}"
-    java -cp target/galaxy-fds-sdk-java-2.0.0-jar-with-dependencies.jar com.xiaomi.infra.galaxy.fds.services.FDSClient \
+    java ${JAVA_OPTS} com.xiaomi.infra.galaxy.fds.services.FDSClient \
 $APP_ACCESS_KEY $APP_ACCESS_SECRET $BUCKET_NAME ${object} >>${local_data}
     if [ $? -ne 0 ]; then
         echo "could not get object ${object}, quit."
@@ -80,3 +82,5 @@ hadoop fs -mkdir -p ${GRID_XIAOMI_ACK_TOKENS_PATH}
 hadoop fs -mkdir -p ${grid_res_path_working}
 hadoop fs -put ${local_data} ${grid_res_path_working}
 hadoop fs -mv ${grid_res_path_working} ${grid_res_path}
+# clean 
+rm -rf ${local_data}
